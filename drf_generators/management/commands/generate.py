@@ -32,6 +32,9 @@ class Command(AppCommand):
         parser.add_argument('--urls', dest='urls', action='store_true',
                             help='generate urls only'),
 
+        parser.add_argument('--prefix', dest='prefix', default=None,
+                            help='a prefix to add to generated files'),
+
     def handle_app_config(self, app_config, **options):
         if app_config.models_module is None:
             raise CommandError('You must provide an app to generate an API')
@@ -49,6 +52,7 @@ class Command(AppCommand):
                 serializers = False
             views = options['views'] if 'views' in options else False
             urls = options['urls'] if 'urls' in options else False
+            prefix = options['prefix'] if 'prefix' in options else None
 
         elif django.VERSION[1] >= 8 or django.VERSION[0] == 2:
             force = options['force']
@@ -57,17 +61,18 @@ class Command(AppCommand):
             serializers = options['serializers']
             views = options['views']
             urls = options['urls']
+            prefix = options['prefix']
         else:
             raise CommandError('You must be using Django 1.7, 1.8 or 1.9')
 
         if format == 'viewset':
-            generator = ViewSetGenerator(app_config, force)
+            generator = ViewSetGenerator(app_config, force, prefix)
         elif format == 'apiview':
-            generator = APIViewGenerator(app_config, force)
+            generator = APIViewGenerator(app_config, force, prefix)
         elif format == 'function':
-            generator = FunctionViewGenerator(app_config, force)
+            generator = FunctionViewGenerator(app_config, force, prefix)
         elif format == 'modelviewset':
-            generator = ModelViewSetGenerator(app_config, force)
+            generator = ModelViewSetGenerator(app_config, force, prefix)
         else:
             message = '\'%s\' is not a valid format. ' % options['format']
             message += '(viewset, modelviewset, apiview, function)'

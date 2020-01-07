@@ -13,7 +13,7 @@ __all__ = ['BaseGenerator', 'APIViewGenerator', 'ViewSetGenerator',
 
 class BaseGenerator(object):
 
-    def __init__(self, app_config, force):
+    def __init__(self, app_config, force, prefix=None):
         self.app_config = app_config
         self.force = force
         self.app = app_config.models_module
@@ -23,10 +23,13 @@ class BaseGenerator(object):
         self.serializers = self.get_serializer_names()
         self.view_template = Template(API_VIEW)
         self.url_template = Template(API_URL)
+        self.prefix = prefix
 
     def generate_serializers(self, depth):
         content = self.serializer_content(depth)
         filename = 'serializers.py'
+        if self.prefix is not None:
+            filename = '{}_{}'.format(self.prefix, filename)
         if self.write_file(content, filename):
             return '  - writing %s' % filename
         else:
@@ -35,6 +38,8 @@ class BaseGenerator(object):
     def generate_views(self):
         content = self.view_content()
         filename = 'views.py'
+        if self.prefix is not None:
+            filename = '{}_{}'.format(self.prefix, filename)
         if self.write_file(content, filename):
             return '  - writing %s' % filename
         else:
@@ -43,6 +48,8 @@ class BaseGenerator(object):
     def generate_urls(self):
         content = self.url_content()
         filename = 'urls.py'
+        if self.prefix is not None:
+            filename = '{}_{}'.format(self.prefix, filename)
         if self.write_file(content, filename):
             return '  - writing %s' % filename
         else:
@@ -84,31 +91,31 @@ class BaseGenerator(object):
 
 class APIViewGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force):
-        super(APIViewGenerator, self).__init__(app_config, force)
+    def __init__(self, app_config, force, prefix=''):
+        super(APIViewGenerator, self).__init__(app_config, force, prefix)
         self.view_template = Template(API_VIEW)
         self.url_template = Template(API_URL)
 
 
 class ViewSetGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force):
-        super(ViewSetGenerator, self).__init__(app_config, force)
+    def __init__(self, app_config, force, prefix=''):
+        super(ViewSetGenerator, self).__init__(app_config, force, prefix)
         self.view_template = Template(VIEW_SET_VIEW)
         self.url_template = Template(VIEW_SET_URL)
 
 
 class FunctionViewGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force):
-        super(FunctionViewGenerator, self).__init__(app_config, force)
+    def __init__(self, app_config, force, prefix=''):
+        super(FunctionViewGenerator, self).__init__(app_config, force, prefix)
         self.view_template = Template(FUNCTION_VIEW)
         self.url_template = Template(FUNCTION_URL)
 
 
 class ModelViewSetGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force):
-        super(ModelViewSetGenerator, self).__init__(app_config, force)
+    def __init__(self, app_config, force, prefix=''):
+        super(ModelViewSetGenerator, self).__init__(app_config, force, prefix)
         self.view_template = Template(MODEL_VIEW)
         self.url_template = Template(MODEL_URL)
